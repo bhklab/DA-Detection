@@ -183,7 +183,7 @@ class Classifier(object):
         # logging.info("Classifying patient {}".format(pid))
 
         # Get the image Data
-        stack, label = self.data_loader.getitem(index)
+        stack, label = self.data_loader[index]
         z_size, x_size, y_size = np.shape(stack)
         # stack = stack[80:-20, 0:350, 50:-50] # Limit the image range
         stack = stack[20:-20, 0:350, 50:-50]

@@ -1,20 +1,26 @@
 import numpy as np
 import pandas as pd
 import os
-from config import get_args
+
+from loading_functions import read_npy_image, read_nrrd_image, read_dicom_image
+
+
 
 ''' This contains the main data loading and preprocessing functions.'''
 
 
 class DataLoader(object):
     """docstring for DataLoader."""
-    def __init__(self, file_type="npy", args):
-        # super(DataLoader, self).__init__()
+    def __init__(self, img_dir, label_path, img_suffix="", file_type="npy"):
+        super(DataLoader, self).__init__()
 
-        self.img_dir, self.img_suffix = args.img_dir, args.img_suffix
-        self.saving, self.log_dir = args.logging, args.logdir
-        self.calc_acc = args.calc_acc
-        self.label_dir = args.label_dir
+        # self.img_dir, self.img_suffix = args.img_dir, args.img_suffix
+        # self.saving, self.log_dir = args.logging, args.logdir
+        # self.calc_acc = args.calc_acc
+        # self.label_dir = args.label_dir
+        self.img_dir = img_dir
+        self.label_path = label_path
+        self.image_suffix = img_suffix
         self.file_type = file_type
 
         # Get a list containing the path to each file
@@ -51,7 +57,7 @@ class DataLoader(object):
         #     return patient_list, None
 
         # Get a df from the CSV of image DA labels
-        df = pd.read_csv(self.label_dir, index_col="p_index",
+        df = pd.read_csv(self.label_path, index_col="p_index",
                          dtype=str, na_values=['nan', 'NaN', ''])
         df = df.set_index("patient_id")
         df["file_path"] = np.zeros(len(df)) * np.nan # Initialize with list of nans
@@ -63,7 +69,9 @@ class DataLoader(object):
                 full_path = os.path.join(self.img_dir, file_name)
 
             elif self.file_type == "dicom" :
-                full_path = self.get_dicom_path(os.path.join(self.img_dir, id))
+                full_path = os.path.join(self.img_dir, id)
+                # full_path = self.get_dicom_path(os.path.join(self.img_dir, id))
+                # print(f"file {id} found")
 
             else :
                 raise(NotImplementedError(f"File type {self.file_type} not supported. Must be 'nrrd', 'npy', or 'dicom'."))
@@ -71,6 +79,9 @@ class DataLoader(object):
             df.loc[id, "file_path"] = full_path
 
         return df.loc[:, "file_path"].values
+
+
+
 
     def get_dicom_path(self, path) :
         """Given a path like
@@ -84,24 +95,34 @@ class DataLoader(object):
         return dicom_path
 
 
-    def getitem(self, index):
+
+
+
+    def __getitem__(self, index):
         '''Load the images for the patient corresponding to index
             in the patient_list'''
 
-        pid = self.patient_list[index]
-        label = self.label_list[index] if self.calc_acc else None
+        # pid = self.patient_list[index]
+        # label = self.label_list[index] if self.calc_acc else None
+        #
+        # # Get the full path to the npy file containing this patient's scans
+        # file_name = str(pid) + self.img_suffix
+        # full_path = os.path.join(self.img_dir, file_name)
+        file_path = self.patient_list[index]
 
-        # Get the full path to the npy file containing this patient's scans
-        file_name = str(pid) + self.img_suffix
-        full_path = os.path.join(self.img_dir, file_name)
 
         # Load the np array representing the patient's image Stack
         if self.file_type == 'npy' :
-            img = np.load(full_path, mmap_mode='r')
+            img = read_npy_image(file_path)
         elif self.file_type == 'nrrd' :
-            img = 
+            img = read_nrrd_image(file_path)
+        elif self.file_type == 'dicom' :
+            file_path = self.get_dicom_path(file_path)
+            img = read_dicom_image(file_path)
+        else :
+            raise(NotImplementedError)
 
-        return img, label
+        return img
 
 
     def __len__(self):
@@ -111,7 +132,8 @@ class DataLoader(object):
 
 
 if __name__ == '__main__' :
-
-    args, unparsed = get_args()
-
-    dl = DataLoader(args)
+    img_dir = "/cluster/projects/radiomics/RADCURE-images"
+    label_path = "/cluster/home/carrowsm/data/radcure_DA_labels.csv"
+    img_suffix = ""
+    file_type = "dicom"
+    dl = DataLoader(img_dir, label_path, img_suffix, file_type="dicom")
