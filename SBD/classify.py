@@ -11,11 +11,10 @@ from argparse import ArgumentParser
 
 from scipy.ndimage.morphology import binary_fill_holes as bf
 from skimage.filters import threshold_otsu, gaussian
-
 from skimage.transform import radon
-
-
 from scipy.signal import find_peaks
+
+import SimpleITK as sitk
 
 import multiprocessing
 
@@ -46,7 +45,7 @@ class Classifier(object):
         self.test_mode = args.test
 
         # File which will contain the predictions made by this class
-        self.log_file = os.path.join(args.logdir, "preds")
+        self.log_dir = os.path.join(args.out_path, "SBD")
 
         # File containing the 'true' class labels
         # self.true_labels_dir = args.label_dir
@@ -85,8 +84,8 @@ class Classifier(object):
          "patient2_ID": None,                         # Patient2 has no artifacts
          "patient3_ID": [slice_index1]}               # Patient3 has 1 slice with artifacts
         '''
-        json_file = self.log_file + ".json"
-        csv_file  = self.log_file + ".csv"
+        json_file = os.path.join(self.log_dir, "locations.json")
+        csv_file  = os.path.join(self.log_dir, "binary_class.csv")
 
         data_dict = {}
         i, pid, y_n = [], [], [] # index, patient_id, boolean prediction
@@ -187,6 +186,11 @@ class Classifier(object):
         # Get the image Data
         stack = self.data_loader[index]            # 3D Image
         pid = self.data_loader.patient_ids[index]  # patient ID for this image
+
+        # Convert SITK image to numpy array
+        if type(stack) is not np.ndarray:
+            stack = sitk.GetArrayFromImage(stack)
+
         z_size, x_size, y_size = np.shape(stack)
         # stack = stack[80:-20, 0:350, 50:-50] # Limit the image range
         stack = stack[20:-20, 0:350, 50:-50]

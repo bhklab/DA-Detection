@@ -17,7 +17,7 @@ def get_dicom_path(path) :
     dicom_path = None
     for root, dirs, files in os.walk(path, topdown=True):
         for name in dirs:
-            if name[-6 : ] == ".DICOM" :
+            if name.endswith(".DICOM") :
                 dicom_path = os.path.join(root, name)
                 # logging.info("DICOM Found")
     return dicom_path
