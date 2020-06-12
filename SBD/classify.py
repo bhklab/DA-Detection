@@ -3,7 +3,7 @@ import json
 import time
 import numpy as np
 import pandas as pd
-from data_loader import DataLoader
+from data_loading.data_loader import DataLoader
 # from config import get_args
 from argparse import ArgumentParser
 
