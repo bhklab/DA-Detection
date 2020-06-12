@@ -24,14 +24,17 @@ parser.add_argument("--test", action='store_true', help="If the test option is g
 
 
 ### Arguments specific to SBD ###
-parser.add_argument("--ncpu", default=None, type=int, help="Number of CPUs to use.")
+parser.add_argument("--ncpu", default=1, type=int, help="Number of CPUs to use.")
+parser.add_argument("--sbd_only", action='store_true',
+                    help="If this flag is given, the script will only classify images with the SBD classifier")
 
 
 ### Arguments specific to CNN ###
-parser.add_argument("--on_gpu", action='store_true', help="Number of CPUs to use.")
+parser.add_argument("--on_gpu", action='store_true', help="Use GPU for CNN classification (recommended).")
+parser.add_argument("--cnn_only", action='store_true',
+                    help="If this flag is given, the script will only classify images with the CNN classifier")
 
 
-args, unparsed = parser.parse_known_args()
 
 
 def get_args():

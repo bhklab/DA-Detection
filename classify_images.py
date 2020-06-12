@@ -115,22 +115,32 @@ def main(args, csv_path, img_path, out_path) :
     # Initialize data loader
     data_loader = DataLoader(img_path, csv_path, img_suffix="", file_type="dicom")
 
-    ### SINOGRAM-BASED DETECTION ###
-    sbd_pool, sbd_tasks, sbd_classifier = setup_SBD(args, data_loader)
-    run_SBD(sbd_pool, sbd_tasks, sbd_classifier)
-    ### ------------------------ ###
+    # Flag to run both classifiers
+    both = args.sbd_only is False and args.cnn_only is False
 
+    if args.sbd_only or both:
+        print("Running SBD")
+        # ### SINOGRAM-BASED DETECTION ###
+        sbd_pool, sbd_tasks, sbd_classifier = setup_SBD(args, data_loader)
+        run_SBD(sbd_pool, sbd_tasks, sbd_classifier)
+        # ### ------------------------ ###
 
-    ### -- CNN-BASED DETECTION - ###
-    network, on_gpu = setup_CNN(args, data_loader)
-    run_cnn(network, on_gpu, data_loader, out_path)
-    ### ------------------------ ###
+    if args.cnn_only or both :
+        print("Running CNN")
+        # ### -- CNN-BASED DETECTION - ###
+        network, on_gpu = setup_CNN(args, data_loader)
+        run_cnn(network, on_gpu, data_loader, out_path)
+        # ### ------------------------ ###
+
+    if args.cnn_only and args.sbd_only :
+        raise Exception("Use only one of '--sbd_only' or '--cnn_only'")
 
 
 
 if __name__ == '__main__':
 
     args, unparsed = get_args()
+    print(args)
 
     csv_path = args.label_dir
     img_path = args.img_dir
