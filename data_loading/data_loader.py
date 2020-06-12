@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from loading_functions import read_npy_image, read_nrrd_image, read_dicom_image
+from data_loading.loading_functions import read_npy_image, read_nrrd_image, read_dicom_image
 
 
 
