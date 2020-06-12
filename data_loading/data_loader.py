@@ -11,7 +11,7 @@ from loading_functions import read_npy_image, read_nrrd_image, read_dicom_image
 
 class DataLoader(object):
     """docstring for DataLoader."""
-    def __init__(self, img_dir, label_path, img_suffix="", file_type="npy", as_array=True):
+    def __init__(self, img_dir, label_path, img_suffix="", file_type="npy"):
         super(DataLoader, self).__init__()
 
         # self.img_dir, self.img_suffix = args.img_dir, args.img_suffix
@@ -22,7 +22,6 @@ class DataLoader(object):
         self.label_path = label_path
         self.image_suffix = img_suffix
         self.file_type = file_type
-        self.as_array = as_array
 
         # Get a list containing the path to each file
         self.patient_list = self.get_patient_list()
