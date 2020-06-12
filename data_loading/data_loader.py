@@ -11,7 +11,7 @@ from data_loading.loading_functions import read_npy_image, read_nrrd_image, read
 
 class DataLoader(object):
     """docstring for DataLoader."""
-    def __init__(self, img_dir, label_path, img_suffix="", file_type="npy"):
+    def __init__(self, img_dir, label_path, img_suffix="", file_type="npy", test=False):
         super(DataLoader, self).__init__()
 
         # self.img_dir, self.img_suffix = args.img_dir, args.img_suffix
@@ -25,6 +25,9 @@ class DataLoader(object):
 
         # Get a list containing the path to each file
         self.patient_list = self.get_patient_list()
+
+        if test : # If in test mode, use only first 100 images
+            self.patient_list[0 : 100]
 
         self.dataset_length = len(self.patient_list) # Total number of patients
 

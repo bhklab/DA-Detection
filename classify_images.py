@@ -6,7 +6,6 @@ import os
 import numpy as np
 import pandas as pd
 import multiprocessing
-import torch
 
 
 from data_loading.data_loader import DataLoader
@@ -14,6 +13,8 @@ from SBD.classify import Classifier
 from CNN.run_on_radcure import classify_img
 from CNN import DAClassification
 from config import get_args
+
+print("imports complete")
 
 
 
@@ -26,7 +27,7 @@ def setup_SBD(args, data_loader) :
 
     # Setup parallel processes
     # Get number of available CPUs
-    if num_cpus == None :
+    if args.ncpus == -1 :
         num_cpus = multiprocessing.cpu_count()
     else :
         num_cpus = args.ncpu
@@ -118,6 +119,10 @@ def main(args, csv_path, img_path, out_path) :
     # Flag to run both classifiers
     both = args.sbd_only is False and args.cnn_only is False
 
+
+    if args.cnn_only and args.sbd_only :
+        raise Exception("Use only one of '--sbd_only' or '--cnn_only'")
+
     if args.sbd_only or both:
         print("Running SBD")
         # ### SINOGRAM-BASED DETECTION ###
@@ -126,14 +131,15 @@ def main(args, csv_path, img_path, out_path) :
         # ### ------------------------ ###
 
     if args.cnn_only or both :
+        import torch
+
         print("Running CNN")
         # ### -- CNN-BASED DETECTION - ###
         network, on_gpu = setup_CNN(args, data_loader)
         run_cnn(network, on_gpu, data_loader, out_path)
         # ### ------------------------ ###
 
-    if args.cnn_only and args.sbd_only :
-        raise Exception("Use only one of '--sbd_only' or '--cnn_only'")
+
 
 
 

@@ -41,9 +41,6 @@ class Classifier(object):
 
         self.data_loader = data_loader
 
-        # Test mode. If true, do only a few iterations
-        self.test_mode = args.test
-
         # File which will contain the predictions made by this class
         self.log_dir = os.path.join(args.out_path, "SBD")
 
@@ -68,7 +65,7 @@ class Classifier(object):
 
         # TXT Implementation
         with open(log_txt, 'a') as f :
-            new_line = "{}:{}\n".format(patient_id, str(indices))
+            new_line = f"{patient_id}:{str(indices)}\n"
             f.write(new_line)
 
         ### APPEND BINARY PREDICTION TO CSV ###
@@ -297,7 +294,7 @@ if __name__ == '__main__' :
     label_path = "/cluster/home/carrowsm/data/radcure_DA_labels.csv"
     img_suffix = ""
     file_type = "dicom"
-    dl = DataLoader(img_dir, label_path, img_suffix, file_type="dicom")
+    dl = DataLoader(img_dir, label_path, img_suffix, file_type="dicom", test=args.test)
     # dl = DataLoader(args)
     p_list = dl.patient_list#, dl.label_list   # Ordered list of patient IDs and their labels
 
