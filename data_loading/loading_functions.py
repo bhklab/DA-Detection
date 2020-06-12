@@ -8,13 +8,15 @@ def read_npy_image(file_path) :
 
 
 
-def read_nrrd_image(nrrd_file_path) :
+def read_nrrd_image(nrrd_file_path, as_array=True) :
     image = sitk.ReadImage(nrrd_file_path)
 
     # Resize the image
-    resamp_img = resample_image(image, new_spacing=[1,1,1])
+    # resamp_img = resample_image(image, new_spacing=[1,1,1])
 
-    imageArray = sitk.GetArrayFromImage(image)
+    if as_array :
+        imageArray = sitk.GetArrayFromImage(image)
+
 
     return imageArray
 
@@ -22,7 +24,7 @@ def read_nrrd_image(nrrd_file_path) :
 
 
 
-def read_dicom_image(dicom_path) :
+def read_dicom_image(dicom_path, as_array=True) :
     """Return SITK image given the absolute path
     to a DICOM series."""
     reader = sitk.ImageSeriesReader()
@@ -32,9 +34,10 @@ def read_dicom_image(dicom_path) :
     image = reader.Execute()
 
     # Resize the image
-    resamp_img = resample_image(image, new_spacing=[1,1,1])
+    # resamp_img = resample_image(image, new_spacing=[1,1,1])
 
     # Comvert image to np array
-    imageArray = sitk.GetArrayFromImage(resamp_img)
+    if as_array :
+        image = sitk.GetArrayFromImage(image)
 
-    return imageArray
+    return image

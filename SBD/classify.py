@@ -4,7 +4,9 @@ import time
 import numpy as np
 import pandas as pd
 from data_loader import DataLoader
-from config import get_args
+# from config import get_args
+from argparse import ArgumentParser
+
 
 
 from scipy.ndimage.morphology import binary_fill_holes as bf
@@ -47,7 +49,7 @@ class Classifier(object):
         self.log_file = os.path.join(args.logdir, "preds")
 
         # File containing the 'true' class labels
-        self.true_labels_dir = args.label_dir
+        # self.true_labels_dir = args.label_dir
 
         self.sigma = 10 # Width of Gaussian for blur
         self.t1 = 0.01  # Threshold for removal of body
@@ -170,7 +172,7 @@ class Classifier(object):
         # img = (img - mean) / (std)
         return img
 
-    def classify(self, inputs) :
+    def classify(self, index) :
         '''Takes one patient's stack of images and classifies it as containing
             'strong' artifacts or no artifact.
             Parameters:
@@ -178,12 +180,13 @@ class Classifier(object):
                 patient ID: str
                 index: the ordered index corresponding to the patient_id
         '''
-        pid, index = inputs[0], inputs[1]
+        # pid, index = inputs[0], inputs[1]
 
         # logging.info("Classifying patient {}".format(pid))
 
         # Get the image Data
-        stack, label = self.data_loader[index]
+        stack = self.data_loader[index]            # 3D Image
+        pid = self.data_loader.patient_ids[index]  # patient ID for this image
         z_size, x_size, y_size = np.shape(stack)
         # stack = stack[80:-20, 0:350, 50:-50] # Limit the image range
         stack = stack[20:-20, 0:350, 50:-50]
@@ -271,11 +274,28 @@ def parallel_setup(num_cpus, p_list) :
 
 if __name__ == '__main__' :
 
-    args, unparsed = get_args()
+    parser = ArgumentParser()
+    parser.add_argument("--img_dir", default=img_path, type=str)
+    parser.add_argument("--img_suffix", default=img_suffix, type=str)
+    parser.add_argument("--calc_acc", action='store_true',
+                        help='Whether or not to calculate the accuracy of predictions, based on image labels.')
+    parser.add_argument("--label_dir", default=label_path, type=str, help='Path to a CSV containing image labels.')
+    parser.add_argument("--logging", action='store_true', help='Whether or not to save results.')
+    parser.add_argument("--logdir", default=log_dir, type=str, help='Where to save results.')
+
+    parser.add_argument("--test", action='store_true', help="If the test option is given, code will only process a few images.")
+
+    parser.add_argument("--ncpu", default=None, type=int, help="Number of CPUs to use.")
+    args, unparsed = parser.parse_known_args()
 
     # Initialize data loader
-    dl = DataLoader(args)
-    p_list, l_list = dl.patient_list, dl.label_list   # Ordered list of patient IDs and their labels
+    img_dir = "/cluster/projects/radiomics/RADCURE-images"
+    label_path = "/cluster/home/carrowsm/data/radcure_DA_labels.csv"
+    img_suffix = ""
+    file_type = "dicom"
+    dl = DataLoader(img_dir, label_path, img_suffix, file_type="dicom")
+    # dl = DataLoader(args)
+    p_list = dl.patient_list#, dl.label_list   # Ordered list of patient IDs and their labels
 
     if args.test :
         # If in test mode, restrict data set size
