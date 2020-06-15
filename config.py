@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 
 ### EDIT THESE PATHS ###
-img_path = "/cluster/projects/radiomics/Temp/RADCURE-npy/img"
+img_path = "/cluster/projects/radiomics/RADCURE-images"
 label_path = "/cluster/home/carrowsm/data/radcure_DA_labels.csv"
 log_dir = "/cluster/home/carrowsm/artifacts/DA-Detection/results/"
 ### ---------------- ###

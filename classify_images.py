@@ -14,7 +14,9 @@ from CNN.run_on_radcure import classify_img
 from CNN import DAClassification
 from config import get_args
 
-print("imports complete")
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.info("Finished importing modules")
 
 
 
@@ -27,12 +29,13 @@ def setup_SBD(args, data_loader) :
 
     # Setup parallel processes
     # Get number of available CPUs
-    if args.ncpus == -1 :
+    if args.ncpu == -1 :
         num_cpus = multiprocessing.cpu_count()
     else :
         num_cpus = args.ncpu
 
     # Make a pool of parallel workers
+    logging.info(f"Using {num_cpus} workers")
     pool = multiprocessing.Pool(num_cpus)
 
     # Create list of tasks. (Matches indices in data_loader)
@@ -44,10 +47,10 @@ def setup_SBD(args, data_loader) :
 def setup_CNN(args, data_loader) :
     # GPU check
     if args.on_gpu and torch.cuda.is_available() :
-        print("Running CNN on GPU")
+        logging.info("Running CNN on GPU")
         on_gpu = True
     else :
-        print("Runnnig CNN on CPU")
+        logging.info("Runnnig CNN on CPU")
         on_gpu = False
 
 
@@ -69,14 +72,14 @@ def setup_CNN(args, data_loader) :
 
 
 def run_SBD(sbd_pool, sbd_tasks, sbd_classifier) :
-    with pool as p :
-        sbd_results = p.map(sbd_classifier.classify, tasks)
+    with sbd_pool as p :
+        sbd_results = p.map(sbd_classifier.classify, sbd_tasks)
 
     # Each value in sbd_results is a tuple with
     # (patient index, patient ID, binaryprediction, location prediction indeces)
     # Save the results and get a data frame of the binary predictions and
     # a dictionary of the location predictions (for predicted DA+ imgs only)
-    sbd_loc_dict, sbd_class_df = classifier.save_all(sbd_results)
+    sbd_loc_dict, sbd_class_df = sbd_classifier.save_all(sbd_results)
 
 
 
@@ -114,7 +117,7 @@ def decision_network(sbd_predictions, cnn_predictions) :
 
 def main(args, csv_path, img_path, out_path) :
     # Initialize data loader
-    data_loader = DataLoader(img_path, csv_path, img_suffix="", file_type="dicom")
+    data_loader = DataLoader(img_path, csv_path, file_type="dicom", test=args.test)
 
     # Flag to run both classifiers
     both = args.sbd_only is False and args.cnn_only is False
@@ -124,7 +127,7 @@ def main(args, csv_path, img_path, out_path) :
         raise Exception("Use only one of '--sbd_only' or '--cnn_only'")
 
     if args.sbd_only or both:
-        print("Running SBD")
+        logging.info("Running SBD")
         # ### SINOGRAM-BASED DETECTION ###
         sbd_pool, sbd_tasks, sbd_classifier = setup_SBD(args, data_loader)
         run_SBD(sbd_pool, sbd_tasks, sbd_classifier)
@@ -133,7 +136,7 @@ def main(args, csv_path, img_path, out_path) :
     if args.cnn_only or both :
         import torch
 
-        print("Running CNN")
+        logging.info("Running CNN")
         # ### -- CNN-BASED DETECTION - ###
         network, on_gpu = setup_CNN(args, data_loader)
         run_cnn(network, on_gpu, data_loader, out_path)
@@ -146,7 +149,7 @@ def main(args, csv_path, img_path, out_path) :
 if __name__ == '__main__':
 
     args, unparsed = get_args()
-    print(args)
+    # print(args)
 
     csv_path = args.label_dir
     img_path = args.img_dir
