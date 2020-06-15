@@ -172,9 +172,8 @@ class Classifier(object):
         '''Takes one patient's stack of images and classifies it as containing
             'strong' artifacts or no artifact.
             Parameters:
-                vars = (patient_id, index)
-                patient ID: str
-                index: the ordered index corresponding to the patient_id
+                index (int): 
+                    The ordered index corresponding to the patient_id
         '''
         # pid, index = inputs[0], inputs[1]
 
@@ -243,6 +242,7 @@ class Classifier(object):
         # (Simply if there were any artifacts or not)
         binary = 2 if len(indices) > 0 else 0
 
+        print(f"Image {index} done")
 
         return index, pid, binary, indices
 
