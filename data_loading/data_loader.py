@@ -27,7 +27,8 @@ class DataLoader(object):
         self.patient_list = self.get_patient_list()
 
         if test : # If in test mode, use only first 100 images
-            self.patient_list[0 : 100]
+            print("Test mode. Using limited set of 100 images.")
+            self.patient_list = self.patient_list[0 : 100]
 
         self.dataset_length = len(self.patient_list) # Total number of patients
 
