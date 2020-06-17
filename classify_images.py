@@ -3,6 +3,7 @@ This is the main script in the DA-Detection package which classifies a set of CT
 as containing strong, weak, or no dental artifacts (DA).
 """
 import os
+import torch
 import numpy as np
 import pandas as pd
 import multiprocessing
@@ -95,6 +96,7 @@ def run_cnn(network, on_gpu, data_loader, out_path) :
 
         # Forward pass though model
         predicted_label, softmax_prob = classify_img(img_path, net=network, on_gpu=on_gpu)
+        logging.info(f"classified patient {path.split('/')[-1]}")
 
         preds.append(predicted_label.item())
         prob1.append(softmax_prob[0].item())
@@ -103,7 +105,7 @@ def run_cnn(network, on_gpu, data_loader, out_path) :
     # Create and save a CSV of results
     path = os.path.join(out_path, "CNN/binary_class.csv")
     df = pd.DataFrame(data={"p_index": np.arange(0, len(data_loader)),
-                            "patient_id": data_loader.patient_list,
+                            "patient_id": data_loader.patient_ids,
                             "CNN_preds": preds,
                             "CNN_probs0": prob1,
                             "CNN_probs1": prob2}, dtype=str)
@@ -134,8 +136,6 @@ def main(args, csv_path, img_path, out_path) :
         # ### ------------------------ ###
 
     if args.cnn_only or both :
-        import torch
-
         logging.info("Running CNN")
         # ### -- CNN-BASED DETECTION - ###
         network, on_gpu = setup_CNN(args, data_loader)
