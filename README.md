@@ -10,7 +10,7 @@ We have also included a thorough analysis of the correlations between hand-picke
 
 
 ## Usage
-### Installation
+### Setup
 To download all requirements, clone the repository:
 ```
 $ git clone https://github.com/bhklab/DA-Detection.git
@@ -20,3 +20,14 @@ Then, create a conda environment with the required packages:
 ```
 $ conda env create -f environment.yml
 ```
+
+### Running CNN and SBD Classifiers
+The `classify_images.py` script should be used to run each classifier. This script should be called from the command line with options for which classifier to use. For example, to classify all data with the sinogram-based detection (SBD) algorithm, type
+```
+python classify_images.py --sbd_only --ncpu=75
+```
+Similarly, to run only the CNN on one GPU, use
+```
+python classify_images.py --cnn_only --on_gpu
+```
+The default behaviour of `classify_images.py` is to run both models on all the data consecutively on one CPU and no GPUs.
