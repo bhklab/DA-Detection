@@ -1,2 +1,6 @@
-# A Package to classify CT scan images, using non-machine learning image processing
-This code uses a combination of thresholding, segmentation, and a Radon transform to detect axial CT scan images which contain strong dental artifact streaks. This algorithm works on entire raw images, not just smaller regions of interest, making it ideal for data set labelling.
+# DA-Detection
+
+## About
+A collection of algorithms for the automated detection of metal dental artifacts (DA) in computed tomography (CT) scans of head and neck cancer patients.
+
+This module consists of sinogram-based detection (SBD) and a convolutional neural network (CNN) which can be used independently as binary DA classifiers for CT volumes, or together as a three-class DA classifier.
