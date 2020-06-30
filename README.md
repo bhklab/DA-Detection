@@ -30,4 +30,4 @@ Similarly, to run only the CNN on one GPU, use
 ```
 python classify_images.py --cnn_only --on_gpu
 ```
-The default behaviour of `classify_images.py` is to run both models on all the data consecutively on one CPU and no GPUs.
+The default behaviour (without any arguments) of `classify_images.py` is to run both models on all the data consecutively on one CPU and no GPUs.
